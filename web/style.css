@@ -70,7 +70,28 @@ html, body {
 .sw.rejected { background: var(--rejected); }
 .sw.own { background: transparent; border: 2px dashed var(--own); }
 
-#account { top: 14px; left: 14px; width: 280px; }
+#account-wrap { position: absolute; top: 14px; left: 14px; width: 280px; z-index: 6; }
+#account-toggle {
+  width: auto;
+  margin: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#account-toggle.is-user::before { content: "● "; color: var(--accent); }
+#account {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+}
 #draw-bar { top: 14px; left: 14px; width: 280px; }
 #place-bar { top: 14px; left: 14px; width: 280px; }
 #detail { top: 14px; right: 14px; width: 320px; max-height: calc(100vh - 28px); overflow: auto; }
@@ -219,3 +240,16 @@ hr { border: none; border-top: 1px solid var(--line); margin: 12px 0; }
 }
 #toast.err { border-color: var(--rejected); }
 #toast.ok { border-color: var(--approved); }
+
+/* ---------- narrow / mobile ---------- */
+@media (max-width: 640px) {
+  #account-wrap { width: min(300px, calc(100vw - 28px)); }
+  #draw-bar, #place-bar { top: 14px; left: 14px; width: calc(100vw - 28px); }
+  #detail { left: 14px; right: 14px; width: auto; max-height: 58vh; }
+  #admin { left: 14px; right: 14px; width: auto; max-height: 62vh; }
+  #layers { width: 150px; padding: 10px; }
+  #layers label { font-size: 12px; margin: 4px 0; }
+  #topbar { max-width: calc(100vw - 28px); }
+  #map-switcher { max-width: calc(100vw - 28px); }
+  #legend { flex-wrap: wrap; justify-content: center; row-gap: 4px; }
+}

@@ -949,7 +949,8 @@ function startDrawing() {
   selectedId = null;
   map.doubleClickZoom.disable();
   map.getCanvas().style.cursor = "crosshair";
-  el("account").classList.add("hidden");
+  setAccountOpen(false);
+  el("account-wrap").classList.add("hidden");
   el("detail").classList.add("hidden");
   el("admin").classList.add("hidden");
   el("place-bar").classList.add("hidden");
@@ -967,7 +968,7 @@ function exitDrawing() {
   if (map.getSource("draw")) map.getSource("draw").setData(empty);
   if (map.getSource("draw-pts")) map.getSource("draw-pts").setData(empty);
   el("draw-bar").classList.add("hidden");
-  el("account").classList.remove("hidden");
+  el("account-wrap").classList.remove("hidden");
 }
 
 function finishDrawing() {
@@ -1040,7 +1041,8 @@ function startPlacing() {
   placePt = null;
   selectedId = null;
   map.getCanvas().style.cursor = "crosshair";
-  el("account").classList.add("hidden");
+  setAccountOpen(false);
+  el("account-wrap").classList.add("hidden");
   el("detail").classList.add("hidden");
   el("admin").classList.add("hidden");
   el("draw-bar").classList.add("hidden");
@@ -1057,7 +1059,7 @@ function exitPlacing() {
   const empty = { type: "FeatureCollection", features: [] };
   if (map.getSource("draw-pts")) map.getSource("draw-pts").setData(empty);
   el("place-bar").classList.add("hidden");
-  el("account").classList.remove("hidden");
+  el("account-wrap").classList.remove("hidden");
 }
 
 async function submitIcon() {
@@ -1098,9 +1100,18 @@ async function submitIcon() {
 }
 
 /* ---------- auth ---------- */
+// The account panel is collapsed by default behind #account-toggle so it
+// doesn't sit over the map (especially on mobile).
+function setAccountOpen(open) {
+  el("account").classList.toggle("hidden", !open);
+  el("account-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+}
+
 function renderAuth() {
   const anon = el("auth-anon");
   const user = el("auth-user");
+  el("account-toggle").textContent = me ? me.display_name : "Sign in";
+  el("account-toggle").classList.toggle("is-user", !!me);
   if (me) {
     anon.classList.add("hidden");
     user.classList.remove("hidden");
@@ -1301,6 +1312,10 @@ function wireUI() {
     cb.onchange = () => setGroupVisible(cb.dataset.group, cb.checked);
   });
 
+  // account panel: collapsed by default, expand on click
+  el("account-toggle").onclick = () =>
+    setAccountOpen(el("account").classList.contains("hidden"));
+
   // auth tabs
   document.querySelectorAll("#auth-anon .tab").forEach((b) => {
     b.onclick = () => {
@@ -1326,6 +1341,7 @@ function wireUI() {
       me = user;
       renderAuth();
       await reloadData();
+      setAccountOpen(false);
       toast("Signed in", "ok");
     } catch (err) {
       el("auth-msg").className = "msg err";
@@ -1348,6 +1364,7 @@ function wireUI() {
       me = user;
       renderAuth();
       await reloadData();
+      setAccountOpen(false);
       toast(
         me.is_admin
           ? "Account created — you are the bootstrap admin."
@@ -1365,6 +1382,7 @@ function wireUI() {
     me = null;
     renderAuth();
     await reloadData();
+    setAccountOpen(false);
   };
 
   el("btn-claim").onclick = startDrawing;
@@ -1388,6 +1406,7 @@ function wireUI() {
   });
 
   el("btn-admin").onclick = () => {
+    setAccountOpen(false);
     el("admin").classList.remove("hidden");
     refreshAdminQueue();
   };
