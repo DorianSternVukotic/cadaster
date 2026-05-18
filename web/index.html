@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cadaster</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230d1b2a'/%3E%3Crect x='3.5' y='3.5' width='9' height='9' fill='none' stroke='%232e9e5b' stroke-width='2'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/vendor/maplibre/maplibre-gl.css" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <!-- Title / map switcher / legend -->
+    <header id="topbar">
+      <div id="title">·</div>
+      <select id="map-switcher" aria-label="Choose map"></select>
+      <div id="legend">
+        <span><i class="sw approved"></i>Approved</span>
+        <span><i class="sw pending"></i>Pending</span>
+        <span><i class="sw rejected"></i>Rejected</span>
+        <span><i class="sw own"></i>Yours</span>
+      </div>
+    </header>
+
+    <!-- Layer toggles -->
+    <section id="layers" class="panel">
+      <strong>Layers</strong>
+      <label><input type="checkbox" data-group="satellite" checked /> Satellite imagery</label>
+      <label><input type="checkbox" data-group="elevation" checked /> Elevation lines</label>
+      <label><input type="checkbox" data-group="plots" checked /> Claimed plots</label>
+      <label><input type="checkbox" data-group="presentation" checked /> Presentation icons</label>
+      <label><input type="checkbox" data-group="grid" checked /> Reference grid</label>
+    </section>
+
+    <!-- Account panel -->
+    <section id="account" class="panel">
+      <div id="auth-anon">
+        <div class="tabs">
+          <button data-tab="login" class="tab active">Sign in</button>
+          <button data-tab="signup" class="tab">Register</button>
+        </div>
+        <form id="login-form" class="authform">
+          <input name="email" type="email" placeholder="Email" required />
+          <input name="password" type="password" placeholder="Password" required />
+          <button type="submit">Sign in</button>
+        </form>
+        <form id="signup-form" class="authform hidden">
+          <input name="displayName" type="text" placeholder="Display name" required />
+          <input name="email" type="email" placeholder="Email" required />
+          <input name="password" type="password" placeholder="Password (min 8)" required />
+          <button type="submit">Create account</button>
+        </form>
+      </div>
+      <div id="auth-user" class="hidden">
+        <div class="who">
+          <strong id="who-name"></strong>
+          <span id="who-badge" class="badge hidden">admin</span>
+        </div>
+        <div class="row">
+          <button id="btn-claim">+ Claim land</button>
+          <button id="btn-place">+ Place icon</button>
+          <button id="btn-admin" class="hidden">Admin</button>
+          <button id="btn-logout" class="ghost">Sign out</button>
+        </div>
+      </div>
+      <div id="auth-msg" class="msg"></div>
+    </section>
+
+    <!-- Draw toolbar -->
+    <section id="draw-bar" class="panel hidden">
+      <strong>Drawing a claim</strong>
+      <p class="hint">Click the map to drop corners. Need 3+. Double-click or
+        Finish to complete · Esc to cancel.</p>
+      <div class="row">
+        <button id="draw-undo" class="ghost">Undo point</button>
+        <button id="draw-finish">Finish &amp; name it</button>
+        <button id="draw-cancel" class="ghost">Cancel</button>
+      </div>
+      <div id="claim-form" class="hidden">
+        <input id="claim-name" type="text" placeholder="Parcel name" maxlength="120" />
+        <textarea id="claim-desc" placeholder="Description (optional)" rows="2"></textarea>
+        <div class="row">
+          <button id="claim-submit">Submit claim</button>
+          <button id="claim-back" class="ghost">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Place-icon toolbar (shares the draw-bar slot) -->
+    <section id="place-bar" class="panel hidden">
+      <strong>Place an icon</strong>
+      <p class="hint">Pick a kind, then click the map to drop it. Esc to cancel.</p>
+      <div id="palette"></div>
+      <div id="place-form" class="hidden">
+        <input id="place-name" type="text" placeholder="Icon name" maxlength="120" />
+        <textarea id="place-desc" placeholder="Description (optional)" rows="2"></textarea>
+        <div class="row">
+          <button id="place-submit">Submit for review</button>
+          <button id="place-cancel" class="ghost">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Parcel / marker detail -->
+    <aside id="detail" class="panel hidden"></aside>
+
+    <!-- Admin drawer -->
+    <aside id="admin" class="panel hidden">
+      <div class="adminhead">
+        <strong>Administration</strong>
+        <button id="admin-close" class="ghost">close</button>
+      </div>
+      <nav class="tabs">
+        <button data-atab="queue" class="tab active">Claims</button>
+        <button data-atab="icons" class="tab">Icons</button>
+        <button data-atab="users" class="tab">Users</button>
+      </nav>
+      <div id="admin-queue">
+        <div class="row">
+          <select id="admin-filter">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="all">All</option>
+          </select>
+          <button id="admin-refresh" class="ghost">Refresh</button>
+        </div>
+        <div id="admin-list"></div>
+      </div>
+      <div id="admin-icons" class="hidden">
+        <div class="row">
+          <select id="icons-filter">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="all">All</option>
+          </select>
+          <button id="icons-refresh" class="ghost">Refresh</button>
+        </div>
+        <div id="icons-list"></div>
+      </div>
+      <div id="admin-users" class="hidden">
+        <div class="row">
+          <input id="promote-email" type="email" placeholder="user@email" />
+          <button id="promote-grant">Make admin</button>
+          <button id="promote-revoke" class="ghost">Revoke</button>
+        </div>
+        <div id="users-list"></div>
+      </div>
+    </aside>
+
+    <div id="toast" class="hidden"></div>
+
+    <script src="/vendor/maplibre/maplibre-gl.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "cadaster-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cadaster API: land-claim submission, admin approval, public map data.",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
+    "maplibre-gl": "^4.7.1",
+    "pg": "^8.13.1",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.7.2"
+  }
+}

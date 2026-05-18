@@ -1,0 +1,6 @@
+We are making a cadaster for a project building a new city. We want to have multiple maps that users can switch between.
+Everyone can see every map, users can submit requests and admins can approve them.
+The maps should have layers, for example sattelite imagery, elevation lines, claimed plots etc.
+The current project has the basic structure but is missing layers and multiple maps. Create mock layers, an image of an island, and another one with some teritorry alongside a river.
+
+Additionally, we want users to be able to place icons on the map, subject to admin approval. These will be conceptual images of buildings, gardens etc etc so there will be a "presentation" layer with those icons.

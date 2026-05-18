@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: cadaster
+      POSTGRES_PASSWORD: cadaster
+      POSTGRES_DB: cadaster
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cadaster -d cadaster"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      DATABASE_URL: postgres://cadaster:cadaster@db:5432/cadaster
+      PORT: 8080
+      SESSION_SECRET: ${SESSION_SECRET:-dev-insecure-secret-change-me}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      TERRITORY_NAME: ${TERRITORY_NAME:-Libertaria}
+      TERRITORY_MIN_X: ${TERRITORY_MIN_X:--1000}
+      TERRITORY_MIN_Y: ${TERRITORY_MIN_Y:--1000}
+      TERRITORY_MAX_X: ${TERRITORY_MAX_X:-1000}
+      TERRITORY_MAX_Y: ${TERRITORY_MAX_Y:-1000}
+      TERRITORY_GRID: ${TERRITORY_GRID:-100}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
